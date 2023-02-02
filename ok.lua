@@ -1274,7 +1274,7 @@ local function add_esp(part, text, colour, toggle)
         return
     end
     local drawing_text = Drawing.new("Text")
-    drawing_text.Outline = true
+    drawing_text.Outline = false
     drawing_text.Center = true
     drawing_text.Visible = false
     drawing_text.Font = 3
@@ -1341,7 +1341,7 @@ ObjectEspTab:AddButton({
         _G.Settings = {
     iron = {
         enabled = true,
-        colour = Color3.fromRGB(199, 172, 120),
+        colour = Color3.fromRGB(128, 0, 32),
     },
     nitrate = {
         enabled = false,
@@ -1349,7 +1349,7 @@ ObjectEspTab:AddButton({
     },
     stone = {
         enabled = false,
-        colour = Color3.fromRGB(205, 205, 205),
+        colour = Color3.fromRGB(25, 25, 25),
     },
 }
 
@@ -1379,7 +1379,7 @@ local function add_esp(part, text, colour, toggle)
         return
     end
     local drawing_text = Drawing.new("Text")
-    drawing_text.Outline = true
+    drawing_text.Outline = false
     drawing_text.Center = true
     drawing_text.Visible = false
     drawing_text.Font = 3
@@ -1454,7 +1454,7 @@ ObjectEspTab:AddButton({
     },
     stone = {
         enabled = true,
-        colour = Color3.fromRGB(205, 205, 205),
+        colour = Color3.fromRGB(25, 25, 25),
     },
 }
 
@@ -1484,7 +1484,7 @@ local function add_esp(part, text, colour, toggle)
         return
     end
     local drawing_text = Drawing.new("Text")
-    drawing_text.Outline = true
+    drawing_text.Outline = false
     drawing_text.Center = true
     drawing_text.Visible = false
     drawing_text.Font = 3
