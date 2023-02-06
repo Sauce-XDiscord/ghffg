@@ -1,0 +1,601 @@
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+
+local ScreenGui = Instance.new("ScreenGui")
+local TextBox = Instance.new("TextBox")
+
+--Properties:
+
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+TextBox.Parent = ScreenGui
+TextBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TextBox.BackgroundTransparency = 100.000
+TextBox.Position = UDim2.new(0.37861526, 0, 0.0603174604, 0)
+TextBox.Size = UDim2.new(0, 200, 0, 50)
+TextBox.Font = Enum.Font.SourceSans
+TextBox.Text = "hello kitty stan FREE https://discord.gg/5DkKNkAQMy"
+TextBox.TextColor3 = Color3.fromRGB(249, 42, 232)
+TextBox.TextSize = 50.000
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+local Window = Rayfield:CreateWindow({
+   Name = "Hello Kitty Stan FREE",
+   LoadingTitle = "free version made by Belgium#0999",
+   LoadingSubtitle = "by Belgium",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = HelloKittyTS, -- Create a custom folder for your hub/game
+      FileName = "Cfg"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "5DkKNkAQMy", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD.
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "key shit",
+      Subtitle = "Key System",
+      Note = "Join the discord discord.gg/5DkKNkAQMy ",
+      FileName = "SiriusKey",
+      SaveKey = true,
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = "(%&tkySYfWQ)Jju"
+   }
+})
+-- Services
+local Players = game:GetService("Players");
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- Player Interact
+local LocalPlayer = Players.LocalPlayer;
+local Mouse = LocalPlayer:GetMouse();
+local Camera = workspace.CurrentCamera
+local _Character = getrenv()._G.Character;
+local Cameras = game:GetService("Workspace").Camera;
+local CurrentCamera = game:GetService("Workspace").CurrentCamera
+local worldToViewportPoint = CurrentCamera.worldToViewportPoint
+-- MetaTables
+local gmt = getrawmetatable(game)
+setreadonly(gmt, false)
+local oldindex = gmt.__index
+-- Updaters
+local LeavesRemoverOn = false
+local HomeRayOn = false
+local ZoomOn = false
+local AimbotOn = false
+local HRTransp = 0.6
+-- Cfg
+local fovcircle = Drawing.new("Circle")
+local Config = {
+    Esp = {
+        Box               = false,
+        BoxOutline        = false,
+        BoxColor          = Color3.fromRGB(255,255,255),
+        BoxOutlineColor   = Color3.fromRGB(0,0,0),
+        HealthBar         = false,
+        HealthBarSide     = "Left", -- Left,Bottom,Right
+        Names             = false,
+        Tool              = false,
+        Skeletons         = true,
+        SkeletonsColor    = Color3.fromRGB(255,255,255),
+        Tracers           = false,
+        TracersColor      = Color3.fromRGB(255,255,255),
+        NamesOutline      = false,
+        NamesColor        = Color3.fromRGB(255,255,255),
+        NamesOutlineColor = Color3.fromRGB(0,0,0),
+        NamesFont         = 2, -- 1,2,3
+        NamesSize         = 13,
+    },
+
+	ObjectEsp = {
+		Stone          = false,
+		Iron           = false,
+		Nitrate        = false,
+		Loot           = false,
+		Lootbags       = false,
+	},
+
+    Aimlock = {
+        Enabled     = false,
+        Smoothness  = 20,
+        Distance    = 300,
+        AimSleepers = false,
+        AimVisible  = false,
+    },
+
+    Hitboxes = {
+        Transparency     = 0.8,
+        XSize            = 3,
+        YSize            = 6,
+        ZSize            = 2,
+    },
+}
+fovcircle.Visible      = false
+fovcircle.Radius       = 120
+fovcircle.Color        = Color3.fromRGB(255,255,255)
+fovcircle.Thickness    = 1
+fovcircle.Filled       = false
+fovcircle.Transparency = 1
+fovcircle.Position     = Vector2.new(CurrentCamera.ViewportSize.X / 2, CurrentCamera.ViewportSize.Y / 2)
+
+local Tab = Window:CreateTab("visual",4667191660) -- Title, Image
+local Tab3 = Window:CreateTab("crosshair",157951897) -- Title, Image
+
+-- GetClosestPlayerToPlayer
+function getClosestPlayerToPlayer()
+    local closestPlayer = nil;
+    local shortestDistance = Config.Aimlock.Distance;
+    for i, v in pairs(workspace:GetChildren()) do
+        if v:IsA("Model") and v:FindFirstChild("Humanoid") and v.Name then
+            if v.Humanoid.Health ~= 0 and v.PrimaryPart ~= nil and v:FindFirstChild("Head") then
+                local pos = Cameras.WorldToViewportPoint(Cameras, v.PrimaryPart.Position)
+                local magnitude = (_Character.character.Middle.Position - v.PrimaryPart.Position).magnitude
+                local fovmagnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).magnitude
+                
+                if magnitude < shortestDistance then
+                    if fovmagnitude < 120 then
+                        closestPlayer = v
+                        shortestDistance = magnitude
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+--
+local Typing = false
+
+local ViewportSize_ = Camera.ViewportSize / 2
+local Axis_X, Axis_Y = ViewportSize_.X, ViewportSize_.Y
+
+local HorizontalLine = Drawing.new("Line")
+local VerticalLine = Drawing.new("Line")
+
+_G.ToMouse = true
+
+_G.CrosshairVisible = false
+_G.CrosshairSize = 10
+_G.CrosshairThickness = 1
+_G.CrosshairColor = Color3.fromRGB(255, 0, 0)
+_G.CrosshairTransparency = 1
+
+RunService.RenderStepped:Connect(function()
+    local Real_Size = _G.CrosshairSize / 2
+
+    HorizontalLine.Color = _G.CrosshairColor
+    HorizontalLine.Thickness = _G.CrosshairThickness
+    HorizontalLine.Visible = _G.CrosshairVisible
+    HorizontalLine.Transparency = _G.CrosshairTransparency
+    
+    VerticalLine.Color = _G.CrosshairColor
+    VerticalLine.Thickness = _G.CrosshairThickness
+    VerticalLine.Visible = _G.CrosshairVisible
+    VerticalLine.Transparency = _G.CrosshairTransparency
+    
+    if _G.ToMouse == true then
+        HorizontalLine.From = Vector2.new(UserInputService:GetMouseLocation().X - Real_Size, UserInputService:GetMouseLocation().Y)
+        HorizontalLine.To = Vector2.new(UserInputService:GetMouseLocation().X + Real_Size, UserInputService:GetMouseLocation().Y)
+        
+        VerticalLine.From = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y - Real_Size)
+        VerticalLine.To = Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y + Real_Size)
+    elseif _G.ToMouse == false then
+        HorizontalLine.From = Vector2.new(Axis_X - Real_Size, Axis_Y)
+        HorizontalLine.To = Vector2.new(Axis_X + Real_Size, Axis_Y)
+    
+        VerticalLine.From = Vector2.new(Axis_X, Axis_Y - Real_Size)
+        VerticalLine.To = Vector2.new(Axis_X, Axis_Y + Real_Size)
+    end
+end)
+
+UserInputService.TextBoxFocused:Connect(function()
+    Typing = true
+end)
+
+UserInputService.TextBoxFocusReleased:Connect(function()
+    Typing = false
+end)
+
+--rbxassetid://4667191660
+function CreateObjectEsp(name,text,color,P)
+    local ESP = Instance.new("BillboardGui")
+    local EspText = Instance.new("TextLabel")
+
+    ESP.Name = name
+    ESP.Parent = P
+    ESP.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ESP.Active = true
+    ESP.AlwaysOnTop = true
+    ESP.LightInfluence = 1.000
+    ESP.Size = UDim2.new(0, 200, 0, 50)
+    ESP.SizeOffset = Vector2.new(0, 0.3)
+    ESP.Adornee = P
+
+    EspText.Name = "EspText"
+    EspText.Parent = ESP
+    EspText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    EspText.BackgroundTransparency = 1.000
+    EspText.Size = UDim2.new(0, 200, 0, 50)
+    EspText.Font = Enum.Font.FredokaOne
+    EspText.Text = text
+    EspText.TextColor3 = color
+    EspText.TextSize = 16
+    EspText.TextWrapped = true
+end
+
+function CreateEsp(Player)
+    local Box,BoxOutline,Name,HealthBar,HealthBarOutline = Drawing.new("Square"),Drawing.new("Square"),Drawing.new("Text"),Drawing.new("Square"),Drawing.new("Square")
+    local Updater = game:GetService("RunService").RenderStepped:Connect(function()
+    if Player ~= nil and Player:FindFirstChild("Humanoid") ~= nil and Player:FindFirstChild("HumanoidRootPart") ~= nil and Player.Humanoid.Health > 0 and Player:FindFirstChild("Head") ~= nil then
+        local Target2dPosition,IsVisible = workspace.CurrentCamera:WorldToViewportPoint(Player.HumanoidRootPart.Position)
+        local scale_factor = 1 / (Target2dPosition.Z * math.tan(math.rad(workspace.CurrentCamera.FieldOfView * 0.5)) * 2) * 100
+        local width, height = math.floor(40 * scale_factor), math.floor(60 * scale_factor)
+            if Config.Esp.Box then
+                Box.Visible = IsVisible
+                Box.Color = Config.Esp.BoxColor
+                Box.Size = Vector2.new(width,height)
+                Box.Position = Vector2.new(Target2dPosition.X - Box.Size.X / 2,Target2dPosition.Y - Box.Size.Y / 2)
+                Box.Filled = false
+                Box.Thickness = 1
+                Box.ZIndex = 69
+                if Config.Esp.BoxOutline then
+                    BoxOutline.Visible = IsVisible
+                    BoxOutline.Color = Config.Esp.BoxOutlineColor
+                    BoxOutline.Size = Vector2.new(width,height)
+                    BoxOutline.Position = Vector2.new(Target2dPosition.X - Box.Size.X / 2,Target2dPosition.Y - Box.Size.Y / 2)
+                    BoxOutline.Filled = false
+                    BoxOutline.Thickness = 1
+                    BoxOutline.ZIndex = 1
+                else
+                    BoxOutline.Visible = false
+                end
+            else
+                Box.Visible = false
+                BoxOutline.Visible = false
+            end
+            if Config.Esp.Names then
+                Name.Visible = IsVisible
+                Name.Color = Config.Esp.NamesColor
+                Name.Text = Player.Head.Nametag.tag.Text
+                Name.Center = true
+                Name.Outline = Config.Esp.NamesOutline
+                Name.OutlineColor = Config.Esp.NamesOutlineColor
+                Name.Position = Vector2.new(Target2dPosition.X,Target2dPosition.Y - height * 0.5 + -15)
+                Name.Font = Config.Esp.NamesFont
+                Name.Size = Config.Esp.NamesSize
+            else
+                Name.Visible = false
+            end
+            if Config.Esp.HealthBar then
+                HealthBarOutline.Visible = IsVisible
+                HealthBarOutline.Color = Color3.fromRGB(0,0,0)
+                HealthBarOutline.Filled = true
+                HealthBarOutline.ZIndex = 1
+
+                HealthBar.Visible = IsVisible
+                HealthBar.Color = Color3.fromRGB(255,0,0):lerp(Color3.fromRGB(0,255,0), Player:FindFirstChild("Humanoid").Health/Player:FindFirstChild("Humanoid").MaxHealth)
+                HealthBar.Thickness = 1
+                HealthBar.Filled = true
+                HealthBar.ZIndex = 69
+                if Config.Esp.HealthBarSide == "Left" then
+                    HealthBarOutline.Size = Vector2.new(2,height)
+                    HealthBarOutline.Position = Vector2.new(Target2dPosition.X - Box.Size.X / 2,Target2dPosition.Y - Box.Size.Y / 2) + Vector2.new(-3,0)
+                    
+                    HealthBar.Size = Vector2.new(1,-(HealthBarOutline.Size.Y - 2) * (Player:FindFirstChild("Humanoid").Health/Player:FindFirstChild("Humanoid").MaxHealth))
+                    HealthBar.Position = HealthBarOutline.Position + Vector2.new(1,-1 + HealthBarOutline.Size.Y)
+                elseif Config.Esp.HealthBarSide == "Bottom" then
+                    HealthBarOutline.Size = Vector2.new(width,3)
+                    HealthBarOutline.Position = Vector2.new(Target2dPosition.X - Box.Size.X / 2,Target2dPosition.Y - Box.Size.Y / 2) + Vector2.new(0,height + 2)
+
+                    HealthBar.Size = Vector2.new((HealthBarOutline.Size.X - 2) * (Player:FindFirstChild("Humanoid").Health/Player:FindFirstChild("Humanoid").MaxHealth),1)
+                    HealthBar.Position = HealthBarOutline.Position + Vector2.new(1,-1 + HealthBarOutline.Size.Y)
+                elseif Config.Esp.HealthBarSide == "Right" then
+                    HealthBarOutline.Size = Vector2.new(2,height)
+                    HealthBarOutline.Position = Vector2.new(Target2dPosition.X - Box.Size.X / 2,Target2dPosition.Y - Box.Size.Y / 2) + Vector2.new(width + 1,0)
+                    
+                    HealthBar.Size = Vector2.new(1,-(HealthBarOutline.Size.Y - 2) * (Player:FindFirstChild("Humanoid").Health/Player:FindFirstChild("Humanoid").MaxHealth))
+                    HealthBar.Position = HealthBarOutline.Position + Vector2.new(1,-1 + HealthBarOutline.Size.Y)
+                end
+            else
+                HealthBar.Visible = false
+                HealthBarOutline.Visible = false
+            end
+        else
+            Box.Visible = false
+            BoxOutline.Visible = false
+            Name.Visible = false
+            HealthBar.Visible = false
+            HealthBarOutline.Visible = false
+            if not Player then
+                Box:Remove()
+                BoxOutline:Remove()
+                Name:Remove()
+                HealthBar:Remove()
+                HealthBarOutline:Remove()
+                Updater:Disconnect()
+            end
+        end 
+    end)
+end
+for _,i in pairs(game:GetService("Workspace"):GetChildren()) do 
+    if i:FindFirstChild("Humanoid") and i ~= game.Players.LocalPlayer.Character and i:FindFirstChild("HumanoidRootPart") and i.Head:FindFirstChild("Nametag") then
+        CreateEsp(i)
+    end
+end
+
+game.Workspace.DescendantAdded:Connect(function(i)
+    if i:FindFirstChild("Humanoid") and i ~= game.Players.LocalPlayer.Character and i:FindFirstChild("HumanoidRootPart") and i.Head:FindFirstChild("Nametag") then
+        CreateEsp(i)
+    end
+end)
+--
+
+local Toggle = Tab:CreateToggle({
+   Name = "box",
+   CurrentValue = false,
+   Flag = "BoxEsp", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Toggle)
+		    Config.Esp.Box = Toggle
+end,
+})
+
+local CurrentFovChanged = 70
+local Slider = Tab:CreateSlider({
+   Name = "Fov",
+   Range = {0, 120},
+   Increment = 1,
+   Suffix = "Bananas",
+   CurrentValue = 70,
+   Flag = "fov", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(t)
+    CurrentFovChanged = t
+    gmt.__index = newcclosure(function(self,b)
+        if b == "FieldOfView" then
+            return t
+        end
+        return oldindex(self,b)
+    end)
+   end,
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local Toggle = Tab3:CreateToggle({
+   Name = "CrossHair",
+   CurrentValue = false,
+   Flag = "CrossHair", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Toggle)
+		_G.CrosshairVisible = Toggle
+end,
+})
+local Toggle = Tab3:CreateToggle({
+   Name = "To Mouse",
+   CurrentValue = true,
+   Flag = "ToMouse", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Toggle)
+		_G.ToMouse = Toggle
+end,
+})
+local Toggle = Tab:CreateToggle({
+   Name = "FullBright",
+   CurrentValue = false,
+   Flag = "full bright", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function()
+if not _G.FullBrightExecuted then
+
+	_G.FullBrightEnabled = false
+
+	_G.NormalLightingSettings = {
+		Brightness = game:GetService("Lighting").Brightness,
+		ClockTime = game:GetService("Lighting").ClockTime,
+		FogEnd = game:GetService("Lighting").FogEnd,
+		GlobalShadows = game:GetService("Lighting").GlobalShadows,
+		Ambient = game:GetService("Lighting").Ambient
+	}
+
+	game:GetService("Lighting"):GetPropertyChangedSignal("Brightness"):Connect(function()
+		if game:GetService("Lighting").Brightness ~= 1 and game:GetService("Lighting").Brightness ~= _G.NormalLightingSettings.Brightness then
+			_G.NormalLightingSettings.Brightness = game:GetService("Lighting").Brightness
+			if not _G.FullBrightEnabled then
+				repeat
+					wait()
+				until _G.FullBrightEnabled
+			end
+			game:GetService("Lighting").Brightness = 1
+		end
+	end)
+
+	game:GetService("Lighting"):GetPropertyChangedSignal("ClockTime"):Connect(function()
+		if game:GetService("Lighting").ClockTime ~= 12 and game:GetService("Lighting").ClockTime ~= _G.NormalLightingSettings.ClockTime then
+			_G.NormalLightingSettings.ClockTime = game:GetService("Lighting").ClockTime
+			if not _G.FullBrightEnabled then
+				repeat
+					wait()
+				until _G.FullBrightEnabled
+			end
+			game:GetService("Lighting").ClockTime = 12
+		end
+	end)
+
+	game:GetService("Lighting"):GetPropertyChangedSignal("FogEnd"):Connect(function()
+		if game:GetService("Lighting").FogEnd ~= 786543 and game:GetService("Lighting").FogEnd ~= _G.NormalLightingSettings.FogEnd then
+			_G.NormalLightingSettings.FogEnd = game:GetService("Lighting").FogEnd
+			if not _G.FullBrightEnabled then
+				repeat
+					wait()
+				until _G.FullBrightEnabled
+			end
+			game:GetService("Lighting").FogEnd = 786543
+		end
+	end)
+
+	game:GetService("Lighting"):GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+		if game:GetService("Lighting").GlobalShadows ~= false and game:GetService("Lighting").GlobalShadows ~= _G.NormalLightingSettings.GlobalShadows then
+			_G.NormalLightingSettings.GlobalShadows = game:GetService("Lighting").GlobalShadows
+			if not _G.FullBrightEnabled then
+				repeat
+					wait()
+				until _G.FullBrightEnabled
+			end
+			game:GetService("Lighting").GlobalShadows = false
+		end
+	end)
+
+	game:GetService("Lighting"):GetPropertyChangedSignal("Ambient"):Connect(function()
+		if game:GetService("Lighting").Ambient ~= Color3.fromRGB(178, 178, 178) and game:GetService("Lighting").Ambient ~= _G.NormalLightingSettings.Ambient then
+			_G.NormalLightingSettings.Ambient = game:GetService("Lighting").Ambient
+			if not _G.FullBrightEnabled then
+				repeat
+					wait()
+				until _G.FullBrightEnabled
+			end
+			game:GetService("Lighting").Ambient = Color3.fromRGB(178, 178, 178)
+		end
+	end)
+
+	game:GetService("Lighting").Brightness = 1
+	game:GetService("Lighting").ClockTime = 12
+	game:GetService("Lighting").FogEnd = 786543
+	game:GetService("Lighting").GlobalShadows = false
+	game:GetService("Lighting").Ambient = Color3.fromRGB(178, 178, 178)
+
+	local LatestValue = true
+	spawn(function()
+		repeat
+			wait()
+		until _G.FullBrightEnabled
+		while wait() do
+			if _G.FullBrightEnabled ~= LatestValue then
+				if not _G.FullBrightEnabled then
+					game:GetService("Lighting").Brightness = _G.NormalLightingSettings.Brightness
+					game:GetService("Lighting").ClockTime = _G.NormalLightingSettings.ClockTime
+					game:GetService("Lighting").FogEnd = _G.NormalLightingSettings.FogEnd
+					game:GetService("Lighting").GlobalShadows = _G.NormalLightingSettings.GlobalShadows
+					game:GetService("Lighting").Ambient = _G.NormalLightingSettings.Ambient
+				else
+					game:GetService("Lighting").Brightness = 1
+					game:GetService("Lighting").ClockTime = 12
+					game:GetService("Lighting").FogEnd = 786543
+					game:GetService("Lighting").GlobalShadows = false
+					game:GetService("Lighting").Ambient = Color3.fromRGB(178, 178, 178)
+				end
+				LatestValue = not LatestValue
+			end
+		end
+	end)
+end
+
+_G.FullBrightExecuted = true
+_G.FullBrightEnabled = not _G.FullBrightEnabled
+   end,
+})
+local Button = Tab:CreateButton({
+   Name = "Leaves Remove",
+   Callback = function()
+    LeavesRemoverOn = true
+    while LeavesRemoverOn == true do
+        for v, i in pairs(game:GetService("Workspace"):GetChildren()) do
+            if i:FindFirstChild("Part") then
+                if i:FindFirstChild("top") then
+                    i.top:Remove()
+                else
+                    for x,b in pairs(i:GetChildren()) do
+                        if b.ClassName == "MeshPart" and b.MeshId == "rbxassetid://743205322" then
+                            b:Remove()
+                        end
+                    end
+                end
+            end
+        end
+    wait(5)
+    end
+end,
+})
+
+local Toggle = Tab:CreateToggle({
+   Name = "Grass On",
+   CurrentValue = true,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(GrassRemove)
+sethiddenproperty(game.Workspace.Terrain, "Decoration", GrassRemove)
+   end,
+})
+
+
+local Keybind = Tab:CreateKeybind({
+   Name = "xray",
+   CurrentKeybind = "X",
+   HoldToInteract = false,
+   Flag = "Keybind1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function()
+     if HomeRayOn == false then
+        HomeRayOn = true
+        for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+            if v:FindFirstChild("Hitbox") then
+                v.Hitbox.Transparency = HRTransp
+            end
+        end
+    else
+        HomeRayOn = false
+        for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+            if v:FindFirstChild("Hitbox") then
+                v.Hitbox.Transparency = 0
+            end
+        end
+    end
+   end,
+})
+
+local Slider = Tab:CreateSlider({
+   Name = "Slider Example",
+   Range = {0, 1},
+   Increment = 0.1,
+   Suffix = "",
+   CurrentValue = 0.9,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function()
+HRTransp = Slider
+   end,
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
