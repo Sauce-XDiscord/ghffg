@@ -125,6 +125,8 @@ fovcircle.Transparency = 1
 fovcircle.Position     = Vector2.new(CurrentCamera.ViewportSize.X / 2, CurrentCamera.ViewportSize.Y / 2)
 
 local Tab = Window:CreateTab("visual",4667191660) -- Title, Image
+local Section = Tab:CreateSection("Buy premium to remove watermark + aimbot and more features ")
+local Section = Tab:CreateSection("Buy premium to remove watermark + aimbot and more features ")
 local Tab3 = Window:CreateTab("crosshair",157951897) -- Title, Image
 
 -- GetClosestPlayerToPlayer
