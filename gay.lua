@@ -1585,8 +1585,8 @@ ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings() 
 SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
-ThemeManager:SetFolder('MyScriptHub')
-SaveManager:SetFolder('MyScriptHub/specific-game')
+ThemeManager:SetFolder('HelloiKitty Stan')
+SaveManager:SetFolder('TS  hello kitty')
 SaveManager:BuildConfigSection(UITab) 
 ThemeManager:ApplyToTab(UITab)
 Library.KeybindFrame.Visible = true; -- todo: add a function for this
@@ -1610,9 +1610,6 @@ Library.ToggleKeybind = Options.MenuKeybind -- Allows you to have a custom keybi
 -- ThemeManager (Allows you to have a menu theme system)
 
 -- Hand the library over to our managers
-ThemeManager:SetLibrary(Library)
-SaveManager:SetLibrary(Library)
-
 -- Ignore keys that are used by ThemeManager.
 -- (we dont want configs to save themes, do we?)
 SaveManager:IgnoreThemeSettings()
@@ -1624,8 +1621,8 @@ SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
 -- use case for doing it this way:
 -- a script hub could have themes in a global folder
 -- and game configs in a separate folder per game
-ThemeManager:SetFolder('MyScriptHub')
-SaveManager:SetFolder('MyScriptHub/specific-game')
+ThemeManager:SetFolder('Hello Kitty')
+SaveManager:SetFolder('TS hello kitty')
 
 -- Builds our config menu on the right side of our tab
 SaveManager:BuildConfigSection(Tabs['UI Settings'])
@@ -1636,3 +1633,4 @@ ThemeManager:ApplyToTab(Tabs['UI Settings'])
 
 -- You can use the SaveManager:LoadAutoloadConfig() to load a config
 -- which has been marked to be one that auto loads!
+
