@@ -1,25 +1,186 @@
--- Gui to Lua
--- Version: 3.2
+--//Watermark
+local Watermark_Text = Drawing.new("Text")
+Watermark_Text.Text = 'hello kitty stan free'
+Watermark_Text.Center = true
+Watermark_Text.Outline = true
+Watermark_Text.Color = Color3.new(3, 1, 1)
+Watermark_Text.Visible = true
+Watermark_Text.Size = 20
+Watermark_Text.Font = 2
+Watermark_Text.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, 0)
 
--- Instances:
 
-local ScreenGui = Instance.new("ScreenGui")
-local TextBox = Instance.new("TextBox")
 
---Properties:
 
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-TextBox.Parent = ScreenGui
-TextBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-TextBox.BackgroundTransparency = 100.000
-TextBox.Position = UDim2.new(0.37861526, 0, 0.0603174604, 0)
-TextBox.Size = UDim2.new(0, 200, 0, 50)
-TextBox.Font = Enum.Font.SourceSans
-TextBox.Text = "hello kitty stan FREE https://discord.gg/5DkKNkAQMy"
-TextBox.TextColor3 = Color3.fromRGB(249, 42, 232)
-TextBox.TextSize = 50.000
+
+
+
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rain-Design/Unnamed/main/Library.lua'))()
+Library.Theme = "Tokyo Night"
+local Flags = Library.Flags
+
+local Window = Library:Window({
+   Text = "Hello Kitty | TS"
+})
+
+
+
+
+
+
+
+
+
+local Tab = Window:Tab({
+   Text = "Aiming"
+})
+
+local Tab2 = Window:Tab({
+   Text = "Visual"
+})
+
+local Tab3 = Window:Tab({
+   Text = "Visual2"
+})
+
+local Tab4 = Window:Tab({
+   Text = "Visua3"
+})
+
+local Section = Tab:Section({
+   Text = "Aim Lock"
+})
+local Section5 = Tab:Section({
+   Text = "Aim Lock"
+})
+
+local Section2 = Tab2:Section({
+   Text = "Buttons2"
+})
+
+local Section3 = Tab3:Section({
+   Text = "Buttons2"
+})
+local Section4 = Tab4:Section({
+   Text = "Buttons2"
+})
+
+
+
+
+
+
+
+Section:Button({
+   Text = "Kill All",
+   Callback = function()
+       warn("Killed All")
+   end
+})
+
+Section2:Button({
+   Text = "Kick",
+   Callback = function()
+       warn("Kick.")
+   end
+})
+
+Section2:Keybind({
+   Text = "Press",
+   Default = Enum.KeyCode.Z,
+   Callback = function()
+       warn("Pressed.")
+   end
+})
+
+Section2:Input({
+   Text = "Lil Input",
+   Callback = function(txt)
+       warn(txt)
+   end
+})
+
+Section:Button({
+   Text = "Kill",
+   Callback = function()
+       warn("Teleported")
+   end
+})
+
+local drop = Section:Dropdown({
+   Text = "Choose",
+   List = {"Idk", "Test"},
+   Callback = function(v)
+       warn(v)
+   end
+})
+
+Section:Slider({
+   Text = "Speed",
+   Default = 25,
+   Minimum = 0,
+   Maximum = 200
+})
+
+Section:Toggle({
+   Text = "Farm",
+   Callback = function(bool)
+       warn(bool)
+   end
+})
+
+Section:Button({
+   Text = "Refresh Dropdown",
+   Callback = function()
+       drop:Remove("Test")
+       wait(2)
+       drop:Add("123")
+   end
+})
+
+Section5:Toggle({
+   Text = "Toggle AimLock",
+   Callback = function(Value)
+       
+   end
+})
+
+--[[
+Name = <string> - The name of the button.
+Callback = <function> - The function of the button.
+]]
+
+-- Variables -- //
+
+local SpinSpeed = 1
+local AimbotSensitivity = 1
+local TeleportDistance = 1.5
+local HitboxRefreshTime = 5
+local SelectedFOV = 140
+local SlideSpeed = 15
+local SlideBoost = true
+local PlayerEspOn = true
+local AimbotEnabled = true
+local OreEspEnabled = true
+local HitboxEnabled = true
+local AllHeadsEnabled = true
+local NotAllHeadShots = true
+local BackpackEspEnabled = true
+local FlyOn = true
+local OreOn = true
+local CrouchAlways = true
+local SlideAlways = true
+local SpinIsOn = true
+local AutoReloadOn = true
+local CustomTerrainColor = true
+local CustomArmColor = true
+local FPSBooster = true
+local WallEspOn = true
+local FPSArms = workspace.Ignore.FPSArms
+
+local BoostLoop = nil
+Tab:Select()
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
 local Window = Rayfield:CreateWindow({
    Name = "Hello Kitty Stan FREE",
